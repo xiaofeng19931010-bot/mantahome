@@ -11,6 +11,27 @@ This is a static website for Manta VPP, built with HTML and Tailwind CSS.
 
 ## Deployment
 
+### Vercel (Recommended)
+
+This project is configured for easy deployment on Vercel. A `vercel.json` file is included to handle routing.
+
+1.  **Install Vercel CLI** (if you haven't already):
+    ```bash
+    npm i -g vercel
+    ```
+
+2.  **Deploy**:
+    Run the following command in your terminal:
+    ```bash
+    vercel
+    ```
+    Follow the prompts to deploy your project.
+
+3.  **Deploy via Git Integration**:
+    - Push your code to a Git repository (GitHub, GitLab, Bitbucket).
+    - Import the project into Vercel.
+    - Vercel will automatically detect the configuration.
+
 ### GitHub Pages
 
 This project is ready to be deployed on GitHub Pages.
