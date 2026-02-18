@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manta VPP | Intelligent Energy Trading</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@400;600;700&family=Roboto:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Manrope', 'sans-serif'],
+                    },
+                    colors: {
+                        manta: {
+                            green: '#2E9F58',
+                            dark: '#0B0F19',
+                            card: '#151B2B',
+                            border: 'rgba(255, 255, 255, 0.1)',
+                        }
+                    },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                        'hero-glow': 'conic-gradient(from 180deg at 50% 50%, #2E9F58 0deg, #0ea5e9 180deg, #2E9F58 360deg)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            background-color: #0B0F19;
+            color: #F3F4F6;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent body scroll, handle in container */
+        }
+        .snap-container {
+            height: 100vh;
+            width: 100vw;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+        .snap-section {
+            min-height: 100vh;
+            width: 100%;
+            scroll-snap-align: start;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        /* Allow longer sections to scroll naturally if needed, but snap to top */
+        .snap-section.long-content {
+            justify-content: flex-start;
+            padding-top: 80px; /* Nav height offset */
+        }
+        
+        .glass-nav {
+            background: rgba(11, 15, 25, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .glass-card {
+            background: rgba(21, 27, 43, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            border-color: rgba(46, 159, 88, 0.3);
+            transform: translateY(-2px);
+        }
+        .glass-input {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .glass-input:focus {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #2E9F58;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(46, 159, 88, 0.2);
+        }
+        .text-gradient {
+            background: linear-gradient(to right, #4ade80, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .grid-bg {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        }
+        .metric-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        /* Nav active state */
+        .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-emerald-500/30">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-nav transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex-shrink-0 flex items-center gap-2">
+                    <div class="flex items-end gap-1" onclick="scrollToSection('home')" style="cursor: pointer;">
+                        <div class="relative w-24 h-16 shrink-0">
+                            <div class="absolute inset-y-0 left-0 w-[56.67%]">
+                                <svg viewBox="0 0 54.4 64" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <defs>
+                                        <linearGradient id="paint0_linear_logo" x1="0" y1="32" x2="54.4" y2="32" gradientUnits="userSpaceOnUse">
+                                            <stop stop-color="#00E944"></stop>
+                                            <stop offset="1" stop-color="#0066FF"></stop>
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M52.1159 11.0476C53.5637 13.392 54.4 16.1553 54.4 19.1145C54.4 22.2345 53.4699 25.1363 51.8741 27.5594C46.5717 27.526 41.5481 26.3191 37.0463 24.1873C43.7312 22.1409 49.2028 17.3119 52.1159 11.0476Z" fill="url(#paint0_linear_logo)"></path>
+                                    <path d="M16.1222 0C18.5046 11.1342 25.9071 20.4017 35.8417 25.3106H35.8432C35.9009 25.3391 35.959 25.3671 36.0169 25.3953C36.2932 25.53 36.5715 25.661 36.8516 25.789C37.042 25.8759 37.233 25.9616 37.4251 26.0454C41.5286 27.8349 46.0209 28.8979 50.7406 29.0696C50.477 29.3793 50.2025 29.6794 49.9156 29.9671C48.8636 29.8997 47.8028 29.8644 46.7338 29.8644C44.6568 29.8644 42.61 29.9937 40.6009 30.2446C39.9815 30.3219 39.3659 30.4113 38.7539 30.5115C30.1601 31.9195 22.3178 35.5643 15.8407 40.8288C8.51952 46.7793 2.94268 54.799 0 64C1.79791 54.1144 6.5496 45.2615 13.3043 38.3895C9.28851 33.589 6.86962 27.4031 6.86962 20.6502C6.86962 12.438 10.4456 5.06296 16.1222 0Z" fill="url(#paint0_linear_logo)"></path>
+                                </svg>
+                            </div>
+                            <div class="absolute bottom-[20%] right-0 w-[71.67%] h-[17.5%]">
+                                 <svg viewBox="0 0 68.8 11.2" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <defs>
+                                        <linearGradient id="paint1_linear_logo" x1="0" y1="5.6" x2="68.8" y2="5.6" gradientUnits="userSpaceOnUse">
+                                            <stop stop-color="#00E944"></stop>
+                                            <stop offset="1" stop-color="#0066FF"></stop>
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M7.2 4.8L11.2 0H14.4V11.2H11.2V4L8 8H6.4L3.2 4V11.2H0V0H3.2L7.2 4.8Z" fill="url(#paint1_linear_logo)"></path>
+                                    <path d="M30.4 11.2H27.2L23.2 4L21.4219 7.2H23.2L24.8 9.6H20.0891L19.2 11.2H16L22.4 0H24L30.4 11.2Z" fill="url(#paint1_linear_logo)"></path>
+                                    <path d="M40 6.71953V0H43.2V11.2H40L35.2 4.47969V11.2H32V0H35.2L40 6.71953Z" fill="url(#paint1_linear_logo)"></path>
+                                    <path d="M56 2.4H52V11.2H48.8V2.4H44.8V0H56V2.4Z" fill="url(#paint1_linear_logo)"></path>
+                                    <path d="M68.8 11.2H65.6L61.6 4L59.8219 7.2H61.6L63.2 9.6H58.4891L57.6 11.2H54.4L60.8 0H62.4L68.8 11.2Z" fill="url(#paint1_linear_logo)"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="h-[36px] flex items-center justify-center shrink-0">
+                             <p class="italic text-sm text-[#313949] leading-[1.4]" style="font-family: 'Roboto', sans-serif; color: white;">VPP</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="#home" class="nav-link text-gray-300 hover:text-white transition-colors px-3 py-2 rounded-md text-sm font-medium" onclick="scrollToSection('home')">Home</a>
+                        <a href="#capabilities" class="nav-link text-gray-300 hover:text-white transition-colors px-3 py-2 rounded-md text-sm font-medium" onclick="scrollToSection('capabilities')">Features</a>
+                        <a href="#contact" class="nav-link text-gray-300 hover:text-white transition-colors px-3 py-2 rounded-md text-sm font-medium" onclick="scrollToSection('contact')">Contact</a>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="#contact" class="bg-white text-black hover:bg-gray-100 px-4 py-2 rounded-full text-sm font-semibold transition-all" onclick="scrollToSection('contact')">
+                        Get Started
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Scroll Container -->
+    <main id="main-container" class="snap-container">
+        
+        <!-- SECTION 1: HERO (HOME) -->
+        <section id="home" class="snap-section">
+            <div class="absolute inset-0 grid-bg -z-10"></div>
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] -z-10"></div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center w-full">
+                <h1 class="text-5xl md:text-7xl font-display font-bold tracking-tight mb-6 leading-tight">
+                    Transforming Distributed Energy Resources into <br />
+                    <span class="text-gradient">Intelligent Trading Assets</span>
+                </h1>
+                
+                <p class="mt-6 max-w-2xl mx-auto text-lg text-gray-400 leading-relaxed">
+                    Manta is an enterprise-grade Virtual Power Plant SaaS platform designed for energy retailers and aggregators. We transform the journey from "asset connectivity" to "scalable and sustainable revenue generation."
+                </p>
+                
+                <div class="mt-10 flex justify-center gap-4">
+                    <button onclick="scrollToSection('capabilities')" class="px-8 py-3 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold transition-all shadow-[0_0_20px_rgba(46,159,88,0.3)]">
+                        Explore Platform
+                    </button>
+                    <button onclick="scrollToSection('contact')" class="px-8 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold transition-all backdrop-blur-sm">
+                        Book a Demo
+                    </button>
+                </div>
+
+                <!-- Stats -->
+                <div class="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto border-t border-white/5 pt-12">
+                    <div>
+                        <div class="text-4xl font-bold text-white mb-1">21.6%</div>
+                        <div class="text-sm text-gray-500 uppercase tracking-wider">CAGR Growth</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-bold text-white mb-1">$20k+</div>
+                        <div class="text-sm text-gray-500 uppercase tracking-wider">Annual Savings / Customer</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-bold text-white mb-1">20+</div>
+                        <div class="text-sm text-gray-500 uppercase tracking-wider">Integrated Manufacturers</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Scroll Down Indicator -->
+            <div class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce text-gray-500">
+                <i data-lucide="chevron-down" class="w-8 h-8"></i>
+            </div>
+        </section>
+
+        <!-- SECTION 2: KEY DIFFERENTIATORS (BENTO GRID) -->
+        <section id="capabilities" class="snap-section bg-black/10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20 pt-32">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl md:text-5xl font-display font-bold mb-6">Key Differentiators</h2>
+                    <p class="text-xl text-gray-400 max-w-2xl mx-auto">Engineered for trading excellence — where intelligence meets execution.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-auto md:h-[500px]">
+                    <!-- Large Card: Trading-First Architecture -->
+                    <div class="md:col-span-2 md:row-span-2 glass-card rounded-2xl p-8 flex flex-col relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
+                        <div class="relative z-10 h-full flex flex-col">
+                            <div class="w-12 h-12 rounded-lg bg-emerald-500/20 flex items-center justify-center mb-6 text-emerald-400">
+                                <i data-lucide="trending-up" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-3">Trading-First Architecture</h3>
+                            <p class="text-base text-gray-400 mb-6 max-w-lg">Every component is optimized for financial performance. From data ingestion to execution, our architecture prioritizes latency, accuracy, and profitability.</p>
+                            
+                            <!-- Visual Element -->
+                            <div class="mt-auto w-full h-40 bg-black/20 rounded-xl border border-white/5 p-4 relative overflow-hidden flex items-end justify-between gap-2">
+                                <div class="w-1/6 h-[30%] bg-emerald-500/20 rounded-t-sm"></div>
+                                <div class="w-1/6 h-[50%] bg-emerald-500/30 rounded-t-sm"></div>
+                                <div class="w-1/6 h-[40%] bg-emerald-500/20 rounded-t-sm"></div>
+                                <div class="w-1/6 h-[70%] bg-emerald-500/40 rounded-t-sm"></div>
+                                <div class="w-1/6 h-[60%] bg-emerald-500/30 rounded-t-sm"></div>
+                                <div class="w-1/6 h-[90%] bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-sm relative shadow-[0_0_15px_rgba(16,185,129,0.4)]"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Small Card 1: AI at the Core -->
+                    <div class="glass-card rounded-2xl p-8 flex flex-col justify-between group hover:bg-white/[0.02]">
+                        <div>
+                            <div class="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center mb-4 text-blue-400">
+                                <i data-lucide="brain-circuit" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">AI at the Core</h3>
+                            <p class="text-sm text-gray-400">Enables third-party algorithm integration. Support for Python/Docker models to break vendor lock-in.</p>
+                        </div>
+                    </div>
+
+                    <!-- Small Card 2: Multi-Market Mastery -->
+                    <div class="glass-card rounded-2xl p-8 flex flex-col justify-between group hover:bg-white/[0.02]">
+                        <div>
+                            <div class="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center mb-4 text-purple-400">
+                                <i data-lucide="globe" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">Multi-Market Mastery</h3>
+                            <p class="text-sm text-gray-400">Spot, FCAS, Capacity — a unified platform for diverse revenue streams and market opportunities.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+
+        <!-- SECTION 4: RAPID ONBOARDING (FEATURE HIGHLIGHT 1) -->
+        <section id="features" class="snap-section bg-black/20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                    <!-- Text Content -->
+                    <div class="space-y-8">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-sm font-medium mb-6">
+                                <i data-lucide="zap" class="w-4 h-4"></i> Universal Access Solution
+                            </div>
+                            <h2 class="text-4xl md:text-5xl font-display font-bold mb-6">Rapid DER Onboarding</h2>
+                            <p class="text-xl text-gray-400 leading-relaxed">
+                                Traditional VPP platforms require weeks for new device integration. Manta connects mainstream equipment in <span class="text-white font-bold">hours, not weeks</span>.
+                            </p>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center shrink-0 mt-1">
+                                    <i data-lucide="layers" class="w-5 h-5 text-emerald-500"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-bold text-white mb-2">Unified Semantic Model</h4>
+                                    <p class="text-gray-400">Standardized data models reduce configuration complexity by <span class="text-emerald-400 font-bold">95%</span>.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center shrink-0 mt-1">
+                                    <i data-lucide="check-circle" class="w-5 h-5 text-emerald-500"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-bold text-white mb-2">20+ Pre-integrated Manufacturers</h4>
+                                    <p class="text-gray-400">Tesla, Sungrow, Huawei, SMA, GoodWe and more ready to connect.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-8 border-t border-white/5">
+                            <div class="grid grid-cols-2 gap-8">
+                                <div>
+                                    <div class="text-3xl font-bold text-white mb-1">Hours</div>
+                                    <div class="text-sm text-gray-500 uppercase tracking-wider">Integration Time</div>
+                                </div>
+                                <div>
+                                    <div class="text-3xl font-bold text-white mb-1">-95%</div>
+                                    <div class="text-sm text-gray-500 uppercase tracking-wider">Config Complexity</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visual Content -->
+                    <div class="relative">
+                        <div class="absolute inset-0 bg-emerald-500/20 blur-[100px] rounded-full"></div>
+                        <div class="glass-card rounded-2xl p-8 relative z-10 border border-emerald-500/30">
+                            <div class="space-y-6">
+                                <!-- Brand Logos Mockup -->
+                                <div>
+                                    <p class="text-sm text-gray-500 mb-4 text-center">Trusted Integrations</p>
+                                    <div class="flex flex-wrap justify-center gap-4 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
+                        <div class="w-32 h-16 bg-white/5 rounded border border-white/5 flex items-center justify-center p-2">
+                            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Sungrow_Power_Supply.svg" alt="Sungrow" class="max-w-full max-h-full object-contain">
+                        </div>
+                        <div class="w-32 h-16 bg-white/5 rounded border border-white/5 flex items-center justify-center p-2">
+                            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Huawei-Logo.svg" alt="HUAWEI" class="max-w-full max-h-full object-contain">
+                        </div>
+                        <div class="w-32 h-16 bg-white/5 rounded border border-white/5 flex items-center justify-center p-2">
+                            <img src="https://www.saj-electric.com/storage/saj_logo.png" alt="SAJ" class="max-w-full max-h-full object-contain">
+                        </div>
+                        <div class="w-32 h-16 bg-white/5 rounded border border-white/5 flex items-center justify-center p-2">
+                            <img src="https://en.goodwe.com/Public/Home/images/logo-w.png" alt="GOODWE" class="max-w-full max-h-full object-contain">
+                        </div>
+                        <div class="w-32 h-16 bg-white/5 rounded border border-white/5 flex items-center justify-center p-2">
+                            <img src="https://www.alpha-ess.com/Web/images/logo.png" alt="AlphaESS" class="max-w-full max-h-full object-contain">
+                        </div>
+                        <div class="w-32 h-16 bg-white/5 rounded border border-white/5 flex items-center justify-center p-2">
+                            <img src="https://www.dyness.com/images/logo.png" alt="DYNESS" class="max-w-full max-h-full object-contain">
+                        </div>
+                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: FLEXIBLE STRATEGY (FEATURE HIGHLIGHT 2) -->
+        <section class="snap-section">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                    <!-- Visual Content (Left on desktop) -->
+                    <div class="relative order-2 lg:order-1">
+                        <div class="absolute inset-0 bg-blue-500/20 blur-[100px] rounded-full"></div>
+                        <div class="glass-card rounded-2xl p-1 relative z-10 border border-blue-500/30 overflow-hidden">
+                            <!-- Mock Interface -->
+                            <div class="bg-[#0B0F19] rounded-xl overflow-hidden">
+                                <div class="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/5">
+                                    <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
+                                    <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+                                    <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
+                                    <div class="ml-4 text-xs text-gray-400 font-mono">strategy_builder.vpp</div>
+                                </div>
+                                <div class="p-6 relative min-h-[300px]">
+                                    <!-- Flowchart Nodes -->
+                                    <div class="absolute top-10 left-10 px-4 py-2 bg-emerald-500/20 border border-emerald-500/50 rounded text-emerald-400 text-xs font-mono">Price Input</div>
+                                    <div class="absolute top-10 right-10 px-4 py-2 bg-blue-500/20 border border-blue-500/50 rounded text-blue-400 text-xs font-mono">Grid Load</div>
+                                    
+                                    <div class="absolute top-[45%] left-1/2 -translate-x-1/2 px-6 py-3 bg-white/10 border border-white/20 rounded-lg text-white text-sm font-bold shadow-lg">
+                                        Logic Engine
+                                    </div>
+                                    
+                                    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 px-4 py-2 bg-purple-500/20 border border-purple-500/50 rounded text-purple-400 text-xs font-mono">Dispatch Signal</div>
+
+                                    <!-- Connecting Lines (SVG) -->
+                                    <svg class="absolute inset-0 w-full h-full pointer-events-none opacity-50">
+                                        <path d="M70 50 C 70 100, 200 100, 200 135" stroke="#34D399" fill="none" stroke-width="2" stroke-dasharray="4 4" />
+                                        <path d="M330 50 C 330 100, 200 100, 200 135" stroke="#60A5FA" fill="none" stroke-width="2" stroke-dasharray="4 4" />
+                                        <path d="M200 185 L 200 240" stroke="#A78BFA" fill="none" stroke-width="2" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Text Content -->
+                    <div class="space-y-8 order-1 lg:order-2">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-sm font-medium mb-6">
+                                <i data-lucide="git-branch" class="w-4 h-4"></i> Visual Strategy Orchestration
+                            </div>
+                            <h2 class="text-4xl md:text-5xl font-display font-bold mb-6">Flexible Strategy Configuration</h2>
+                            <p class="text-xl text-gray-400 leading-relaxed">
+                                Move from "blind flight" to precision trading. Build complex strategies like building blocks without writing code.
+                            </p>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center shrink-0 mt-1">
+                                    <i data-lucide="mouse-pointer-2" class="w-5 h-5 text-blue-500"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-bold text-white mb-2">Visual Strategies Builder</h4>
+                                    <p class="text-gray-400">Strategy development evolves from "handcrafting" to "smart manufacturing".</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center shrink-0 mt-1">
+                                    <i data-lucide="history" class="w-5 h-5 text-blue-500"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-bold text-white mb-2">Time Machine Backtesting</h4>
+                                    <p class="text-gray-400">Validate strategies with <span class="text-blue-400 font-bold">1-3 years</span> of real market data (price, weather, load) in minutes.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-8 border-t border-white/5">
+                            <div class="grid grid-cols-2 gap-8">
+                                <div>
+                                    <div class="text-3xl font-bold text-white mb-1">Minutes</div>
+                                    <div class="text-sm text-gray-500 uppercase tracking-wider">Dev Cycle</div>
+                                </div>
+                                <div>
+                                    <div class="text-3xl font-bold text-white mb-1">100%</div>
+                                    <div class="text-sm text-gray-500 uppercase tracking-wider">Risk Verified</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6: AI OPTIMIZATION (FEATURE HIGHLIGHT 3) -->
+        <section class="snap-section bg-black/20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                    <!-- Text Content -->
+                    <div class="space-y-8">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 text-purple-400 text-sm font-medium mb-6">
+                                <i data-lucide="brain" class="w-4 h-4"></i> AI-Driven Dynamic Optimization
+                            </div>
+                            <h2 class="text-4xl md:text-5xl font-display font-bold mb-6">Smarter Trading, Higher Returns</h2>
+                            <p class="text-xl text-gray-400 leading-relaxed">
+                                Static strategies leave money on the table. Manta's AI engine delivers continuous learning and dynamic adaptation.
+                            </p>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center shrink-0 mt-1">
+                                    <i data-lucide="trophy" class="w-5 h-5 text-purple-500"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-bold text-white mb-2">Model Market</h4>
+                                    <p class="text-gray-400">Support for third-party Python/Docker algorithms. Break vendor lock-in.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center shrink-0 mt-1">
+                                    <i data-lucide="refresh-cw" class="w-5 h-5 text-purple-500"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-bold text-white mb-2">Dynamic Selection</h4>
+                                    <p class="text-gray-400">Auto-switch to optimal strategy based on Revenue/MW. Real-time parallel execution.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-8 border-t border-white/5">
+                            <div class="grid grid-cols-2 gap-8">
+                                <div>
+                                    <div class="text-3xl font-bold text-emerald-400 mb-1">+15-25%</div>
+                                    <div class="text-sm text-gray-500 uppercase tracking-wider">Revenue Uplift</div>
+                                </div>
+                                <div>
+                                    <div class="text-3xl font-bold text-white mb-1">5-Min</div>
+                                    <div class="text-sm text-gray-500 uppercase tracking-wider">Update Frequency</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visual Content -->
+                    <div class="relative">
+                        <div class="absolute inset-0 bg-purple-500/20 blur-[100px] rounded-full"></div>
+                        <div class="glass-card rounded-2xl p-8 relative z-10 border border-purple-500/30 flex items-center justify-center min-h-[400px]">
+                            <!-- Neural Network / AI Graphic -->
+                            <div class="relative w-full h-full flex items-center justify-center">
+                                <div class="absolute w-64 h-64 border border-purple-500/20 rounded-full animate-[spin_10s_linear_infinite]"></div>
+                                <div class="absolute w-48 h-48 border border-purple-500/40 rounded-full animate-[spin_15s_linear_infinite_reverse]"></div>
+                                <div class="absolute w-32 h-32 border border-purple-500/60 rounded-full animate-[spin_20s_linear_infinite]"></div>
+                                
+                                <div class="z-20 w-16 h-16 bg-purple-500 rounded-full blur-[20px] absolute"></div>
+                                <div class="z-20 w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.8)] relative">
+                                    <i data-lucide="cpu" class="w-8 h-8 text-purple-600"></i>
+                                </div>
+
+                                <!-- Orbiting Nodes -->
+                                <div class="absolute top-1/2 left-1/2 w-full h-full -translate-x-1/2 -translate-y-1/2 animate-[spin_8s_linear_infinite]">
+                                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-emerald-400 rounded-full shadow-[0_0_10px_#34D399]"></div>
+                                </div>
+                                <div class="absolute top-1/2 left-1/2 w-full h-full -translate-x-1/2 -translate-y-1/2 animate-[spin_12s_linear_infinite_reverse]">
+                                    <div class="absolute bottom-10 left-1/4 w-3 h-3 bg-blue-400 rounded-full shadow-[0_0_10px_#60A5FA]"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6: CONTACT -->
+        <section id="contact" class="snap-section long-content bg-black/30">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl md:text-5xl font-display font-bold mb-6">Partner with Manta</h2>
+                    <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                        Ready to transform your distributed energy resources?
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-20">
+                    <!-- Form -->
+                    <div class="glass-card p-8 rounded-2xl">
+                        <form class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-400 mb-2">First Name</label>
+                                    <input type="text" class="glass-input w-full rounded-lg px-4 py-3" placeholder="John">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-400 mb-2">Last Name</label>
+                                    <input type="text" class="glass-input w-full rounded-lg px-4 py-3" placeholder="Doe">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-2">Work Email</label>
+                                <input type="email" class="glass-input w-full rounded-lg px-4 py-3" placeholder="john@company.com">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-2">How can we help?</label>
+                                <textarea rows="4" class="glass-input w-full rounded-lg px-4 py-3" placeholder="Tell us about your VPP needs..."></textarea>
+                            </div>
+                            <button type="button" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-lg transition-colors shadow-lg shadow-emerald-500/20">
+                                Send Message
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Sidebar -->
+                    <div class="space-y-12 flex flex-col justify-center">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-6">Our Offices</h3>
+                            <div class="space-y-6">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center shrink-0">
+                                        <i data-lucide="map-pin" class="w-5 h-5 text-emerald-500"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold">Sydney HQ</h4>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center shrink-0">
+                                        <i data-lucide="map-pin" class="w-5 h-5 text-emerald-500"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold">Melbourne</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-2xl font-bold mb-6">Our Email</h3>
+                            <div class="space-y-6">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center shrink-0">
+                                        <i data-lucide="mail" class="w-5 h-5 text-emerald-500"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold">support@manta.energy</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Content (Inside Contact Section) -->
+                <div class="border-t border-white/5 pt-12 flex flex-col md:flex-row justify-between items-center gap-6">
+
+                    <div class="text-sm text-gray-600">
+                        © 2026 Manta VPP. All rights reserved.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // Smooth Scroll Function
+        function scrollToSection(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+                updateActiveNav(id);
+            }
+        }
+
+        // Update Active Nav Link
+        function updateActiveNav(id) {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + id) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // Scroll Spy
+        const container = document.getElementById('main-container');
+        const sections = document.querySelectorAll('section');
+
+        container.addEventListener('scroll', () => {
+            let current = '';
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                // Check if section is in the middle of the viewport
+                if (container.scrollTop >= (sectionTop - sectionHeight / 3)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            if (current) {
+                updateActiveNav(current);
+            }
+        });
+    </script>
+</body>
+</html>
